@@ -108,11 +108,12 @@ input[type='submit'] {
     margin: 10px 0;
   }
   form {
-    width: 40%; 
+    width: 40%;
   }
 }
 @media only screen and (min-width: 600px) {
   /* Adjust form styling for extra-large screens */
   form {
-    width: 40%; 
+    width: 40%;
+}
 }
