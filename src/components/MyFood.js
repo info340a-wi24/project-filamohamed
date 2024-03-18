@@ -1,11 +1,47 @@
-import React, { useState } from 'react';
-import foodData from '../data/foods.json' // Import food data JSON
+import React, { useState, useEffect } from 'react';
+import { getDatabase, ref, set, get } from 'firebase/database';
+import foodData from '../data/foods.json';
 
 const MyFood = () => {
   const [searchRestaurant, setSearchRestaurant] = useState('');
   const [searchMeal, setSearchMeal] = useState('');
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [addedFoods, setAddedFoods] = useState([]);
+  const [calorieGoal, setCalorieGoal] = useState(0);
+  const [addedCalories, setAddedCalorie] = useState([]);
+
+  useEffect(() => {
+    const db = getDatabase();
+    const calorieGoalRef = ref(db, 'userData/calorieGoal');
+
+    const fetchCalorieGoal = async () => {
+      const snapshot = await get(calorieGoalRef);
+      if (snapshot.exists()) {
+        setCalorieGoal(snapshot.val());
+      } else {
+        console.log('No data available');
+      }
+    };
+
+    fetchCalorieGoal();
+  }, []);
+
+  useEffect(() => {
+    const db = getDatabase();
+    const addedFoodsRef = ref(db, 'userData/addedFoods');
+
+    const fetchAddedFoods = async () => {
+      const snapshot = await get(addedFoodsRef);
+      if (snapshot.exists()) {
+        setAddedFoods(snapshot.val());
+      } else {
+        console.log('No added foods available');
+      }
+    };
+
+    fetchAddedFoods();
+  }, []);
+
   const handleSearch = () => {
     const restaurant = searchRestaurant.trim();
     const meal = searchMeal.trim();
@@ -34,11 +70,38 @@ const MyFood = () => {
     }
   };
 
-  const handleAddFood = () => {
+  const handleAddFood = async () => {
     if (selectedMeal) {
-      setAddedFoods([...addedFoods, selectedMeal]);
+      const db = getDatabase();
+      const addedFoodsRef = ref(db, 'userData/addedFoods');
+      const calorieGoalRef = ref(db, 'userData/calorieGoal');
+
+      const updatedAddedFoods = [...addedFoods, selectedMeal];
+      const updatedCalorieGoal = calorieGoal - selectedMeal.calories;
+
+      await set(addedFoodsRef, updatedAddedFoods);
+      await set(calorieGoalRef, updatedCalorieGoal);
+
+      setAddedFoods(updatedAddedFoods);
+      setCalorieGoal(updatedCalorieGoal);
+      setAddedCalorie(addedCalories + selectedMeal.calories);
       setSelectedMeal(null);
     }
+  };
+
+  const handleReset = async () => {
+    const db = getDatabase();
+    const addedFoodsRef = ref(db, 'userData/addedFoods');
+    const addedCalorieRef = ref(db, 'userData/addedCalorie');
+    const calorieGoalRef = ref(db, 'userData/calorieGoal');
+
+    await set(addedFoodsRef, []);
+    await set(addedCalorieRef, 0);
+    await set(calorieGoalRef, 0);
+
+    setAddedFoods([]);
+    setCalorieGoal(0);
+    setAddedCalorie(0);
   };
 
   return (
@@ -80,6 +143,11 @@ const MyFood = () => {
           ))}
         </div>
       </section>
+
+      <div className="reset-button-container">
+      <button onClick={handleReset}>Reset</button>
+       </div>
+
     </main>
   );
 };

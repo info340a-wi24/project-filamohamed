@@ -1,3 +1,4 @@
+/* Style the body */
 body {
   margin: 0;
   padding: 0;
@@ -11,7 +12,7 @@ body, ul {
   padding: 0;
 }
 
-/* Style the header */
+
 header {
   background-color: #333; /* Dark background color */
   border-radius: 50px;
@@ -95,8 +96,20 @@ input[type='submit'] {
   margin-bottom: 10px;
   border-radius: 5px;
 }
+.reset-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+footer {
+  text-align: center; /* Center the content */
+  font-size: 14px; /* Set the font size to small */
+}
 
 /* Media queries */
+
+
 /* Media query for small screens */
 @media only screen and (max-width: 600px) {
   header nav {

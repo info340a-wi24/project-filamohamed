@@ -1,8 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'; // Import necessary components from react-router-dom
-import MyDay from './MyDay'; // Import MyDay component
-import MyFood from './MyFood'; // Import MyFood component
-import '../index.css'; // Import CSS styles
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import MyDay from './MyDay';
+import MyFood from './MyFood';
+import '../index.css';
+
 function App() {
   return (
     <Router>
@@ -26,6 +27,10 @@ function App() {
             <Route path="/plan" element={<MyFood />} />
           </Routes>
         </div>
+        <footer>
+          <p>Fila Mohamed</p>
+          <p>Phone: 2064608105</p>
+        </footer>
       </div>
     </Router>
   );

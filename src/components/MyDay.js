@@ -1,49 +1,67 @@
-import { useState, useEffect } from 'react';
-function MyDay() {
-  const [calorieGoal, setCalorieGoal] = useState('');
-  const [bmiResult, setBmiResult] = useState('');
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
+import React, { useState, useEffect } from 'react';
+import { getDatabase, ref, set, onValue } from 'firebase/database';
 
-  useEffect(() => {
-    const savedCalorieGoal = localStorage.getItem('calorieGoal');
-    const savedBmiResult = localStorage.getItem('bmiResult');
-    if (savedCalorieGoal) setCalorieGoal(savedCalorieGoal);
-    if (savedBmiResult) setBmiResult(savedBmiResult);
-  }, []);
+  function MyDay() {
+    const [calorieGoal, setCalorieGoal] = useState('');
+    const [bmiResult, setBmiResult] = useState('');
 
-  useEffect(() => {
-    localStorage.setItem('calorieGoal', calorieGoal);
-    localStorage.setItem('bmiResult', bmiResult);
-  }, [calorieGoal, bmiResult]);
+    useEffect(() => {
+      const db = getDatabase();
+      const calorieRef = ref(db, 'userData/calorieGoal');
+      const bmiRef = ref(db, 'userData/bmiResult');
+
+      const fetchCalorieGoal = () => {
+        onValue(calorieRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            setCalorieGoal(data);
+          }
+        });
+      };
+
+      const fetchBMIResult = () => {
+        onValue(bmiRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            setBmiResult(data);
+          }
+        });
+      };
+
+      fetchCalorieGoal();
+      fetchBMIResult();
+
+    }, []);
 
   const calculateCalorie = (calorieIntake, exercise) => {
-    // Example calculation: Calorie Goal = Calorie Intake - Exercise
     return calorieIntake - exercise;
   };
 
   const calculateBMI = (height, weight) => {
-    // Example calculation: BMI = Weight (kg) / (Height (m) * Height (m))
-    const heightInMeters = height / 100; // Convert height from cm to meters
+    const heightInMeters = height / 100;
     return (weight / (heightInMeters * heightInMeters)).toFixed(1);
   };
 
-  const handleCalorieSubmit = (e) => {
+  const handleCalorieSubmit = async (e) => {
     e.preventDefault();
-    // Example: Get values from form input fields
     const calorieIntake = parseInt(document.getElementById('calories').value, 10);
     const exercise = parseInt(document.getElementById('exercise').value, 10);
     const result = calculateCalorie(calorieIntake, exercise);
     setCalorieGoal(result);
+
+    const db = getDatabase();
+    await set(ref(db, 'userData/calorieGoal'), result);
   };
 
-  const handleBMISubmit = (e) => {
+  const handleBMISubmit = async (e) => {
     e.preventDefault();
-    // Example: Get values from form input fields
     const heightValue = parseInt(document.getElementById('height').value, 10);
     const weightValue = parseInt(document.getElementById('weight').value, 10);
     const result = calculateBMI(heightValue, weightValue);
     setBmiResult(result);
+
+    const db = getDatabase();
+    await set(ref(db, 'userData/bmiResult'), result);
   };
 
   return (
@@ -67,7 +85,7 @@ function MyDay() {
           <section className='my-chart'>
             <h2>Calorie Display and BMI</h2>
             <div id="calorieDisplay">
-              Calorie Goal: {calorieGoal}
+              Calorie Updated: {calorieGoal}
             </div>
             <div id="bmiDisplay">
               BMI Result: {bmiResult}
@@ -85,9 +103,6 @@ function MyDay() {
           </section>
         </div>
       </main>
-      <footer>
-        {/* Footer content goes here */}
-      </footer>
     </>
   );
 }
